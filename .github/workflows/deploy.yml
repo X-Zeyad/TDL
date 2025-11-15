@@ -48,7 +48,7 @@ jobs:
           DB_HOST: $(echo -n '${{ secrets.DB_HOST }}' | base64)
           DB_USER: $(echo -n '${{ secrets.DB_USER }}' | base64)
           DB_PASSWORD: $(echo -n '${{ secrets.DB_PASSWORD }}' | base64)
-        " > secret.yaml
+        " > k8s/secret.yaml
 
     - name: Apply manifests
       run: |
