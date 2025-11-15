@@ -19,12 +19,12 @@ spec:
           - name: TELEGRAM_BOT_TOKEN
             valueFrom:
               secretKeyRef:
-                name: bot-secrets
+                name: bot-secret
                 key: TELEGRAM_BOT_TOKEN
           - name: DATABASE_URL
             valueFrom:
               secretKeyRef:
-                name: bot-secrets
+                name: bot-secret
                 key: DATABASE_URL
         resources:
           requests:
