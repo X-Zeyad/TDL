@@ -53,5 +53,5 @@ jobs:
     - name: Apply manifests
       run: |
         kubectl apply -f k8s/secret.yaml
-        kubectl apply -f k8s/deployment.yaml
-        kubectl apply -f k8s/service.yaml
+        kubectl apply -f k8s/deployment-bot.yaml
+        kubectl apply -f k8s/deployment-scheduler.yaml
