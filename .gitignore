@@ -1,0 +1,8 @@
+__pycache__/
+.env
+secret.yaml
+*.pyc
+*.egg-info/
+venv/
+instance/
+*.sqlite3
