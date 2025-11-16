@@ -46,6 +46,9 @@ jobs:
         data:
           TELEGRAM_BOT_TOKEN: $(echo -n '${{ secrets.BOT_TOKEN }}' | base64)
           DATABASE_URL: $(echo -n '${{ secrets.DATABASE_URL }}' | base64)
+          DB_HOST: $(echo -n '${{ secrets.DB_HOST }}' | base64)
+          DB_USER: $(echo -n '${{ secrets.DB_USER }}' | base64)
+          DB_PASSWORD: $(echo -n '${{ secrets.DB_PASSWORD }}' | base64)
         " > k8s/secret.yaml
 
     - name: Apply manifests
