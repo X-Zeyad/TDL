@@ -2,7 +2,8 @@ name: Build and Deploy Bot
 
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+      - main
 
 jobs:
   build-and-deploy:
@@ -38,19 +39,27 @@ jobs:
 
       - name: Create secret.yaml dynamically
         run: |
-          cat <<EOF > k8s/secret.yaml
+          cat > k8s/secret.yaml << 'EOF'
 apiVersion: v1
 kind: Secret
 metadata:
   name: bot-secret
 type: Opaque
 data:
-  TELEGRAM_BOT_TOKEN: $(echo -n "${{ secrets.BOT_TOKEN }}" | base64)
-  DATABASE_URL: $(echo -n "${{ secrets.DATABASE_URL }}" | base64)
-  DB_HOST: $(echo -n "${{ secrets.DB_HOST }}" | base64)
-  DB_USER: $(echo -n "${{ secrets.DB_USER }}" | base64)
-  DB_PASSWORD: $(echo -n "${{ secrets.DB_PASSWORD }}" | base64)
+  TELEGRAM_BOT_TOKEN: {{ BOT_TOKEN }}
+  DATABASE_URL: {{ DATABASE_URL }}
+  DB_HOST: {{ DB_HOST }}
+  DB_USER: {{ DB_USER }}
+  DB_PASSWORD: {{ DB_PASSWORD }}
 EOF
+
+      - name: Base64 encode secrets inside the secret.yaml
+        run: |
+          sed -i "s/{{ BOT_TOKEN }}/$(echo -n '${{ secrets.BOT_TOKEN }}' | base64)/" k8s/secret.yaml
+          sed -i "s/{{ DATABASE_URL }}/$(echo -n '${{ secrets.DATABASE_URL }}' | base64)/" k8s/secret.yaml
+          sed -i "s/{{ DB_HOST }}/$(echo -n '${{ secrets.DB_HOST }}' | base64)/" k8s/secret.yaml
+          sed -i "s/{{ DB_USER }}/$(echo -n '${{ secrets.DB_USER }}' | base64)/" k8s/secret.yaml
+          sed -i "s/{{ DB_PASSWORD }}/$(echo -n '${{ secrets.DB_PASSWORD }}' | base64)/" k8s/secret.yaml
 
       - name: Apply manifests
         run: |
