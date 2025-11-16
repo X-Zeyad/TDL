@@ -90,10 +90,5 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("remind", remind_command))
 
-
-    async def main():
-        await reschedule_pending()
-        await app.run_polling()
-
-
-    asyncio.run(main()) 
+    asyncio.run(reschedule_pending()) 
+    app.run_polling()
