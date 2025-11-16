@@ -84,11 +84,17 @@ async def reschedule_pending():
         session.close()
 
 
-if __name__ == '__main__':
-    scheduler.start()
-    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("remind", remind_command))
+import asyncio
 
-    asyncio.run(reschedule_pending()) 
-    app.run_polling()
+scheduler.start()
+app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("remind", remind_command))
+
+async def main():
+    await reschedule_pending()
+    await app.run_polling()
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
