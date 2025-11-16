@@ -49,5 +49,6 @@ jobs:
 
       - name: Apply Kubernetes manifests
         run: |
+          kubectl apply -f k8s/mysql-statefulset.yaml
           kubectl apply -f k8s/deployment-bot.yaml
           kubectl apply -f k8s/deployment-scheduler.yaml

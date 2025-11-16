@@ -21,7 +21,6 @@ def get_database_url_from_env():
 
 def init_db(database_url=None):
     database_url = database_url or get_database_url_from_env()
-    connect_args = {"ssl": {"ssl_ca": "/etc/ssl/certs/ca-certificates.crt"}}
-    engine = create_engine(database_url, pool_pre_ping=True, connect_args=connect_args)
+    engine = create_engine(database_url, pool_pre_ping=True)
     Base.metadata.create_all(engine)
     return sessionmaker(bind=engine)
