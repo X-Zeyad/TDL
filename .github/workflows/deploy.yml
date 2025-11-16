@@ -2,7 +2,7 @@ name: Build and Deploy Bot
 
 on:
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Build and push image
+      - name: Build and Push Image
         run: |
           docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/telegram-bot:latest .
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/telegram-bot:latest
@@ -39,7 +39,8 @@ jobs:
 
       - name: Create secret.yaml dynamically
         run: |
-          cat > k8s/secret.yaml << 'EOF'
+          mkdir -p k8s
+          cat <<EOF > k8s/secret.yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -53,6 +54,7 @@ data:
   DB_PASSWORD: {{ DB_PASSWORD }}
 EOF
 
+
       - name: Base64 encode secrets inside the secret.yaml
         run: |
           sed -i "s/{{ BOT_TOKEN }}/$(echo -n '${{ secrets.BOT_TOKEN }}' | base64)/" k8s/secret.yaml
@@ -61,7 +63,7 @@ EOF
           sed -i "s/{{ DB_USER }}/$(echo -n '${{ secrets.DB_USER }}' | base64)/" k8s/secret.yaml
           sed -i "s/{{ DB_PASSWORD }}/$(echo -n '${{ secrets.DB_PASSWORD }}' | base64)/" k8s/secret.yaml
 
-      - name: Apply manifests
+      - name: Apply Kubernetes Manifests
         run: |
           kubectl apply -f k8s/secret.yaml
           kubectl apply -f k8s/deployment-bot.yaml
