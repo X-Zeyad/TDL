@@ -1,25 +1,24 @@
-# bot.py
 import os
 import asyncio
 from datetime import datetime, timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.date import DateTrigger
 
-
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-
-from db import init_db
+from db import init_db, wait_for_mysql
 from models import Reminder
-
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
+
+wait_for_mysql(DATABASE_URL)
 SessionLocal = init_db(DATABASE_URL)
+
+# scheduler
 scheduler = AsyncIOScheduler()
-app = None
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Hello! Send /remind YYYY-MM-DD HH:MM | message")
@@ -32,14 +31,12 @@ async def remind_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     when_str = when_str.strip()
     text = text.strip()
     try:
-# Accept ISO or space-separated
         if 'T' in when_str:
             dt = datetime.fromisoformat(when_str)
         else:
             dt = datetime.fromisoformat(when_str.replace(' ', 'T'))
     except Exception:
         return await update.message.reply_text("Invalid date format. Use YYYY-MM-DD HH:MM")
-
 
     session = SessionLocal()
     try:
@@ -50,11 +47,9 @@ async def remind_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     finally:
         session.close()
 
-
     job_id = f"reminder-{r.id}"
     scheduler.add_job(send_notification, trigger=DateTrigger(run_date=dt), args=[r.id], id=job_id, replace_existing=True)
     await update.message.reply_text(f"Reminder scheduled for {dt.isoformat()} (id={r.id})")
-
 
 async def send_notification(reminder_id: int):
     session = SessionLocal()
@@ -70,7 +65,6 @@ async def send_notification(reminder_id: int):
     finally:
         session.close()
 
-
 async def reschedule_pending():
     session = SessionLocal()
     try:
@@ -84,9 +78,8 @@ async def reschedule_pending():
         session.close()
 
 
-import asyncio
-
 scheduler.start()
+
 app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("remind", remind_command))
@@ -95,6 +88,7 @@ async def main():
     await reschedule_pending()
     await app.run_polling()
 
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
+if __name__ == '__main__':
+    import nest_asyncio
+    nest_asyncio.apply()
+    asyncio.run(main())
