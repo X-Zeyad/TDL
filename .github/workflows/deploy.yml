@@ -38,7 +38,7 @@ jobs:
 
     - name: Create secret.yaml dynamically
       run: |
-        echo "apiVersion: v1
+        cat <<EOF > k8s/secret.yaml
         kind: Secret
         metadata:
           name: bot-secret
@@ -49,7 +49,7 @@ jobs:
           DB_HOST: $(echo -n '${{ secrets.DB_HOST }}' | base64)
           DB_USER: $(echo -n '${{ secrets.DB_USER }}' | base64)
           DB_PASSWORD: $(echo -n '${{ secrets.DB_PASSWORD }}' | base64)
-        " > k8s/secret.yaml
+        EOF
 
     - name: Apply manifests
       run: |
