@@ -16,11 +16,12 @@ def get_database_url_from_env():
     port = os.getenv('PORT', '3306')
     db = os.getenv('DB_NAME', 'todo_db')
     # SSL for Azure MySQL
-    return f"mysql+pymysql://{user}:{password}@{host}:{port}/{db}?ssl_mode=REQUIRED"
+    return f"mysql+pymysql://{user}:{password}@{host}:{port}/{db}"
 
 
 def init_db(database_url=None):
     database_url = database_url or get_database_url_from_env()
-    engine = create_engine(database_url, pool_pre_ping=True)
+    connect_args = {"ssl": {"ssl_ca": "/etc/ssl/certs/ca-certificates.crt"}}
+    engine = create_engine(database_url, pool_pre_ping=True, connect_args=connect_args)
     Base.metadata.create_all(engine)
     return sessionmaker(bind=engine)
